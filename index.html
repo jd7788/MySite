@@ -3,30 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>安全网址导航</title>
+  <title>安全导航 | 快捷稳定</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/animation.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="bg-dark-100 font-sans">
+<body class="bg-gray-50 font-sans">
   <!-- 顶部导航 -->
-  <header class="bg-white shadow-md sticky top-0 z-10">
-    <div class="container mx-auto px-4 py-4 max-w-7xl">
+  <header class="bg-white shadow-sm sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4">
       <div class="flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="flex items-center space-x-3">
           <i class="fa fa-compass text-primary text-2xl"></i>
-          <h1 class="text-2xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">安全导航</h1>
+          <h1 class="text-2xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">天空的飞鸟</h1>
         </div>
         
         <!-- 搜索框 -->
         <div class="w-full md:w-1/3">
           <div class="relative">
             <input type="text" id="searchInput" placeholder="搜索内容..." 
-                  class="w-full py-3 px-4 pr-10 rounded-lg border border-dark-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20">
-            <button id="searchBtn" class="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 hover:text-primary transition-colors">
-              <i class="fa fa-search text-lg"></i>
+                  class="w-full py-2 px-4 pr-10 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <button id="searchBtn" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary">
+              <i class="fa fa-search"></i>
             </button>
           </div>
         </div>
@@ -35,51 +34,35 @@
   </header>
 
   <!-- 主要内容 -->
-  <main class="container mx-auto px-4 py-8 max-w-7xl">
-    <!-- 时间显示（带骨架屏） -->
-    <div class="bg-white rounded-2xl p-6 mb-8 shadow-md border border-dark-200 text-center">
-      <div id="dateSkeleton" class="bg-dark-200 h-5 w-40 mx-auto rounded animate-pulse mb-3"></div>
-      <div id="timeSkeleton" class="bg-dark-200 h-10 w-48 mx-auto rounded animate-pulse mb-2"></div>
-      <div id="beijingDate" class="text-dark-400 hidden"></div>
-      <div id="beijingTime" class="text-3xl md:text-4xl font-bold text-dark-500 hidden"></div>
+  <main class="container mx-auto px-4 py-8">
+    <!-- 时间显示 -->
+    <div class="bg-white rounded-xl p-4 mb-6 shadow-sm text-center">
+      <div id="beijingDate" class="text-gray-500"></div>
+      <div id="beijingTime" class="text-2xl font-bold mt-1"></div>
     </div>
 
     <!-- 说明 -->
-    <div class="bg-white rounded-2xl p-5 mb-10 shadow-md border border-dark-200">
-      <p class="text-dark-400"><i class="fa fa-info-circle text-primary mr-2"></i>所有网站均需密码验证后访问）</p>
+    <div class="bg-white rounded-xl p-4 mb-8 shadow-sm">
+      <p class="text-gray-600"><i class="fa fa-info-circle text-primary mr-2"></i>点击相应的卡片即可进入网站</p>
     </div>
 
-    <!-- 网站分类区域（将通过JS动态生成） -->
+    <!-- 网站分类区域（JS动态渲染） -->
     <div id="siteCategories"></div>
   </main>
 
-  <!-- 密码弹窗 -->
-  <div id="passwordModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-2xl p-8 w-[90%] max-w-md shadow-xl transform transition-all">
-      <h3 class="text-xl font-bold text-dark-500 mb-4" id="modalTitle">请输入密码</h3>
-      <p class="text-dark-400 mb-6" id="modalSubtitle">验证通过后将跳转至目标网站</p>
-      <input type="password" id="modalPassword" placeholder="请输入访问密码" 
-             class="w-full py-3 px-4 rounded-lg border border-dark-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 mb-4">
-      <p id="errorTip" class="text-red-500 text-sm mb-6 hidden"></p>
-      <div class="flex gap-4">
-        <button id="cancelBtn" class="flex-1 py-3 px-4 rounded-lg btn-secondary">取消</button>
-        <button id="confirmBtn" class="flex-1 py-3 px-4 rounded-lg btn-primary">
-          <span id="confirmText">验证</span>
-          <span id="loadingSpinner" class="hidden"><i class="fa fa-spinner fa-spin ml-2"></i></span>
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- 页脚 -->
-  <footer class="bg-white border-t border-dark-200 py-6 mt-10">
-    <div class="container mx-auto px-4 text-center text-dark-300 text-sm max-w-7xl">
-      <p>© 2025 安全导航 | 保护你的访问安全</p>
+  <footer class="bg-white border-t border-gray-200 py-6">
+    <div class="container mx-auto px-4 text-center text-gray-500 text-sm">
+      <p>© 2025 安全导航 | 技术出品</p>
     </div>
   </footer>
 
-  <script src="js/sites.js"></script>
+  <!-- 引入JS文件（按依赖顺序） -->
+  <script src="js/config.js"></script>
   <script src="js/floating.js"></script>
   <script src="js/main.js"></script>
+
+  <!-- CF验证脚本（保留原代码） -->
+  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9946833add2bebf3',t:'MTc2MTQ0NTYyNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
