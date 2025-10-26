@@ -1,34 +1,60 @@
-// 强制要求环境变量配置密码的验证接口（无默认密码）
+// 支持不同网址独立密码的验证接口
 export async function onRequestPost(context) {
   try {
     const { request, env } = context;
     const body = await request.json();
     const { siteKey, password } = body;
 
-    // 1. 必须从环境变量获取密码（无默认值）
-    const ACCESS_PASSWORD = env.VITE_ACCESS_PASSWORD;
-    if (!ACCESS_PASSWORD) {
+    // 1. 从环境变量获取「网站-密码」映射表（必须配置）
+    const SITE_PASSWORDS_JSON = env.VITE_SITE_PASSWORDS;
+    if (!SITE_PASSWORDS_JSON) {
       return new Response(JSON.stringify({
         success: false,
-        message: "服务器未配置访问密码，请联系管理员"
+        message: "服务器未配置网站密码表，请联系管理员"
       }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
     }
-    
-    // 2. 验证密码
-    if (password !== ACCESS_PASSWORD) {
+
+    // 2. 解析JSON（处理格式错误）
+    let sitePasswordMap;
+    try {
+      sitePasswordMap = JSON.parse(SITE_PASSWORDS_JSON);
+    } catch (e) {
+      console.error("解析密码表JSON失败:", e);
       return new Response(JSON.stringify({
         success: false,
-        message: "密码错误"
+        message: "服务器密码表配置格式错误"
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // 3. 检查当前网站是否配置了密码
+    if (!sitePasswordMap[siteKey]) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: `【${siteKey}】未设置访问密码`
+      }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // 4. 验证密码（匹配当前网站的独立密码）
+    if (password !== sitePasswordMap[siteKey]) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: "密码错误，请重试"
       }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // 3. 网站地址映射（默认配置）
+    // 5. 网站跳转地址映射（默认配置，可选通过VITE_SITE_URLS自定义）
     let siteUrls = {
       baidu: "https://www.baidu.com",
       google: "https://www.google.com",
@@ -61,16 +87,16 @@ export async function onRequestPost(context) {
       baijiajiangtan: "https://tv.cctv.com/lm/bjjjt/"
     };
 
-    // 合并环境变量中的网站地址（如果配置）
+    // 合并可选的自定义地址（VITE_SITE_URLS）
     if (env.VITE_SITE_URLS) {
       try {
         const envUrls = JSON.parse(env.VITE_SITE_URLS);
-        siteUrls = { ...siteUrls, ...envUrls }; // 环境变量配置覆盖默认值
+        siteUrls = { ...siteUrls, ...envUrls };
       } catch (e) {
-        console.error("解析VITE_SITE_URLS失败:", e);
+        console.error("解析自定义地址JSON失败:", e);
         return new Response(JSON.stringify({
           success: false,
-          message: "服务器配置错误"
+          message: "服务器地址表配置格式错误"
         }), {
           status: 500,
           headers: { 'Content-Type': 'application/json' }
@@ -78,10 +104,10 @@ export async function onRequestPost(context) {
       }
     }
 
-    // 4. 返回目标地址
+    // 6. 返回目标地址
     return new Response(JSON.stringify({
       success: true,
-      targetUrl: siteUrls[siteKey] || siteUrls.baidu // 找不到时默认百度
+      targetUrl: siteUrls[siteKey] || siteUrls.baidu
     }), {
       headers: { 'Content-Type': 'application/json' }
     });
