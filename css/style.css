@@ -1,0 +1,32 @@
+/* Tailwind 扩展配置（核心：放大图标和标签） */
+@layer utilities {
+  .card-hover { 
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:bg-primary/5; 
+  }
+  .category-title { 
+    @apply text-lg md:text-xl font-bold text-dark mb-4 pl-3 py-1 border-l-4 border-primary; 
+  }
+  /* 卡片放大：max-w从120px→150px，内边距从p-5→p-6 */
+  .site-card { 
+    @apply bg-white rounded-xl p-6 shadow-sm card-hover flex flex-col items-center text-center w-full max-w-[150px] mx-auto cursor-pointer; 
+  }
+  /* 图标放大：text-2xl→text-3xl，md:text-3xl→md:text-4xl，margin从mb-3→mb-4 */
+  .site-icon { 
+    @apply text-3xl md:text-4xl mb-4 transition-transform group-hover:scale-110; 
+  }
+  /* 标签文字放大：text-sm→text-base，md:text-base→md:text-lg */
+  .site-name { 
+    @apply text-base md:text-lg font-medium truncate w-full; 
+  }
+}
+
+/* 基础颜色定义 */
+:root {
+  --color-primary: #3B82F6;
+  --color-dark: #1F2937;
+}
+
+/* 全局样式补充 */
+.bg-primary { background-color: var(--color-primary); }
+.text-primary { color: var(--color-primary); }
+.text-dark { color: var(--color-dark); }
