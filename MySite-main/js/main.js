@@ -1,61 +1,58 @@
 document.addEventListener('DOMContentLoaded', () => {
   const { apiVerifyPath, fetchTimeout, siteCategories } = window.APP_CONFIG;
 
-  // 初始化北京时间显示（核心新增）
-  initTimeDisplay();
-  // 初始化搜索功能
-  initSearch();
-  // 初始化密码弹窗
-  initPasswordModal();
+  // 初始化功能
+  initTimeDisplay();       // 北京时间显示
+  initSearch();            // 搜索功能
+  initPasswordModal();     // 密码弹窗（修复按钮点击）
 
   // 北京时间显示（标准时区实现）
   function initTimeDisplay() {
-    // 强制使用上海时区（北京时间），不受用户本地时区影响
     function updateTime() {
+      // 强制锁定北京时间时区
       const dateOptions = {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
         weekday: 'long',
-        timeZone: 'Asia/Shanghai' // 锁定北京时间时区
+        timeZone: 'Asia/Shanghai'
       };
       
       const timeOptions = {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false, // 24小时制
-        timeZone: 'Asia/Shanghai' // 锁定北京时间时区
+        hour12: false,
+        timeZone: 'Asia/Shanghai'
       };
 
       const now = new Date();
-      // 格式化日期和时间（确保是北京时间）
       const beijingDate = new Intl.DateTimeFormat('zh-CN', dateOptions).format(now);
       const beijingTime = new Intl.DateTimeFormat('zh-CN', timeOptions).format(now);
 
-      // 更新DOM显示
+      // 更新DOM
       document.getElementById('beijingDate').textContent = beijingDate;
       document.getElementById('beijingTime').textContent = beijingTime;
 
-      // 隐藏骨架屏，显示实际时间
+      // 隐藏骨架屏
       document.getElementById('dateSkeleton').classList.add('hidden');
       document.getElementById('timeSkeleton').classList.add('hidden');
       document.getElementById('beijingDate').classList.remove('hidden');
       document.getElementById('beijingTime').classList.remove('hidden');
     }
 
-    // 初始化立即执行一次，之后每秒更新
     updateTime();
-    setInterval(updateTime, 1000);
+    setInterval(updateTime, 1000); // 每秒更新
   }
 
-  // 密码弹窗相关逻辑（已有的代码）
+  // 密码弹窗相关变量
   let currentSiteKey = "";
   let currentSiteName = "";
   let currentSiteUrl = "";
 
+  // 打开验证弹窗（静态HTML调用）
   window.verifySite = function(siteKey) {
-    // 从config中匹配网站信息（已有逻辑）
+    // 从config匹配网站信息
     let targetSite = null;
     for (const category of siteCategories) {
       const site = category.sites.find(item => item.key === siteKey);
@@ -64,15 +61,17 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
       }
     }
+
     if (!targetSite) {
       alert("网站配置不存在");
       return;
     }
+
     currentSiteKey = siteKey;
     currentSiteName = targetSite.name;
     currentSiteUrl = targetSite.defaultUrl;
 
-    // 打开弹窗（已有逻辑）
+    // 显示弹窗
     document.getElementById('modalTitle').textContent = `请输入【${currentSiteName}】的访问密码`;
     document.getElementById('modalPassword').value = '';
     document.getElementById('errorTip').classList.add('hidden');
@@ -80,15 +79,60 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modalPassword').focus();
   };
 
-  // 提交验证函数（已有的代码）
+  // 初始化密码弹窗（修复按钮点击）
+  function initPasswordModal() {
+    const modal = document.getElementById('passwordModal');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const modalPassword = document.getElementById('modalPassword');
+
+    // 强制启用按钮点击
+    cancelBtn.style.pointerEvents = 'auto';
+    confirmBtn.style.pointerEvents = 'auto';
+
+    // 取消按钮逻辑
+    cancelBtn.onclick = () => {
+      modal.classList.add('hidden');
+      if (currentSiteUrl) {
+        window.open(currentSiteUrl, '_blank');
+      }
+    };
+
+    // 确定按钮逻辑
+    confirmBtn.onclick = async () => {
+      const password = modalPassword.value.trim();
+      if (!password) {
+        showError('请输入密码');
+        return;
+      }
+      await submitVerification(password);
+    };
+
+    // 点击弹窗外部关闭
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.classList.add('hidden');
+      }
+    };
+
+    // 回车提交
+    modalPassword.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        confirmBtn.click();
+      }
+    };
+  }
+
+  // 提交验证
   async function submitVerification(password) {
     const confirmText = document.getElementById('confirmText');
     const loadingSpinner = document.getElementById('loadingSpinner');
     const modal = document.getElementById('passwordModal');
 
+    // 显示加载状态
     confirmText.textContent = '验证中';
     loadingSpinner.classList.remove('hidden');
-    confirmText.disabled = true;
+    confirmBtn.disabled = true;
 
     try {
       const response = await fetchWithTimeout(apiVerifyPath, {
@@ -108,15 +152,50 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       showError(err.name === 'AbortError' ? '请求超时，请检查网络' : '服务器连接失败');
     } finally {
+      // 恢复状态
       confirmText.textContent = '验证';
       loadingSpinner.classList.add('hidden');
-      confirmText.disabled = false;
+      confirmBtn.disabled = false;
     }
   }
 
-  // 其他辅助函数（搜索、错误提示等，保持不变）
-  function initPasswordModal() { /* 已有逻辑 */ }
-  function showError(message) { /* 已有逻辑 */ }
-  function initSearch() { /* 已有逻辑 */ }
-  async function fetchWithTimeout(url, options = {}) { /* 已有逻辑 */ }
+  // 显示错误提示
+  function showError(message) {
+    const errorTip = document.getElementById('errorTip');
+    errorTip.textContent = message;
+    errorTip.classList.remove('hidden');
+    // 3秒后自动隐藏错误提示
+    setTimeout(() => errorTip.classList.add('hidden'), 3000);
+  }
+
+  // 搜索功能
+  function initSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+
+    const performSearch = () => {
+      const query = searchInput.value.trim();
+      if (query) window.open(`https://www.bing.com/search?q=${encodeURIComponent(query)}`);
+    };
+
+    searchBtn.onclick = performSearch;
+    searchInput.onkeydown = (e) => {
+      if (e.key === 'Enter') performSearch();
+    };
+  }
+
+  // 带超时的fetch
+  async function fetchWithTimeout(url, options = {}) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), fetchTimeout);
+
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timeoutId);
+      return response;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      throw err;
+    }
+  }
 });
