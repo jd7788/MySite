@@ -1,9 +1,19 @@
-/* 1. Tailwind配置（完全复用源码，确保颜色和工具类一致） */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* 1. 必须先注入 Tailwind 配置（原代码缺失，导致颜色变量无效） */
+@layer tailwind-base, tailwind-components, tailwind-utilities;
 
-/* 2. 完全复用源码中的@layer utilities（卡片/图标/标签样式1:1） */
+@layer tailwind-base {
+  @tailwind base;
+}
+
+@layer tailwind-components {
+  @tailwind components;
+}
+
+@layer tailwind-utilities {
+  @tailwind utilities;
+}
+
+/* 2. 配置 Tailwind 自定义颜色（与源码一致，关键修复） */
 @layer utilities {
   /* 卡片样式：增强立体感和交互 */
   .site-card { 
@@ -44,7 +54,7 @@
   }
 }
 
-/* 3. 完全复用源码中的颜色定义（确保颜色变量一致） */
+/* 3. 定义颜色变量（与源码一致） */
 :root {
   --color-primary: #3B82F6;      /* 主色：科技蓝（hover统一色） */
   --color-success: #10B981;      /* 辅助色：成功绿 */
@@ -56,12 +66,13 @@
   --color-dark-500: #1F2937;     /* 主文本 */
 }
 
-/* 4. 颜色变量与Tailwind类关联（确保样式生效） */
-.bg-dark-100 { background-color: var(--color-dark-100); }
-.border-dark-200 { border-color: var(--color-dark-200); }
-.text-dark-300 { color: var(--color-dark-300); }
-.text-dark-400 { color: var(--color-dark-400); }
-.text-dark-500 { color: var(--color-dark-500); }
-.bg-primary { background-color: var(--color-primary); }
-.text-primary { color: var(--color-primary); }
-.bg-primary/5 { background-color: rgba(59, 130, 246, 0.05); }
+/* 4. 关键修复：将颜色变量映射到 Tailwind 类（原代码未正确关联） */
+.bg-primary { background-color: var(--color-primary) !important; }
+.text-primary { color: var(--color-primary) !important; }
+.bg-primary\/5 { background-color: rgba(59, 130, 246, 0.05) !important; }
+
+.bg-dark-100 { background-color: var(--color-dark-100) !important; }
+.border-dark-200 { border-color: var(--color-dark-200) !important; }
+.text-dark-300 { color: var(--color-dark-300) !important; }
+.text-dark-400 { color: var(--color-dark-400) !important; }
+.text-dark-500 { color: var(--color-dark-500) !important; }
