@@ -1,4 +1,9 @@
-/* Tailwind 扩展配置（核心：放大图标和标签） */
+/* 1. 首先引入 Tailwind 基础工具类（修复样式丢失核心：确保工具类生效） */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 2. 自定义工具类（卡片样式核心，补充完整依赖） */
 @layer utilities {
   .card-hover { 
     @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:bg-primary/5; 
@@ -6,27 +11,41 @@
   .category-title { 
     @apply text-lg md:text-xl font-bold text-dark mb-4 pl-3 py-1 border-l-4 border-primary; 
   }
-  /* 卡片放大：max-w从120px→150px，内边距从p-5→p-6 */
+  /* 卡片样式：补充完整属性，确保背景、边框、阴影等可见 */
   .site-card { 
-    @apply bg-white rounded-xl p-6 shadow-sm card-hover flex flex-col items-center text-center w-full max-w-[150px] mx-auto cursor-pointer; 
+    @apply bg-white rounded-xl p-6 shadow-sm border border-gray-100 /* 新增边框，增强卡片感 */
+           card-hover flex flex-col items-center text-center w-full max-w-[150px] 
+           mx-auto cursor-pointer; 
   }
-  /* 图标放大：text-2xl→text-3xl，md:text-3xl→md:text-4xl，margin从mb-3→mb-4 */
+  /* 图标样式：确保尺寸和间距正确 */
   .site-icon { 
     @apply text-3xl md:text-4xl mb-4 transition-transform group-hover:scale-110; 
   }
-  /* 标签文字放大：text-sm→text-base，md:text-base→md:text-lg */
+  /* 标签文字样式：确保换行和宽度控制 */
   .site-name { 
     @apply text-base md:text-lg font-medium truncate w-full; 
   }
 }
 
-/* 基础颜色定义 */
+/* 3. 基础颜色定义（确保自定义颜色生效） */
 :root {
-  --color-primary: #3B82F6;
-  --color-dark: #1F2937;
+  --color-primary: #3B82F6;    /* 主蓝色，与原设计一致 */
+  --color-dark: #1F2937;       /* 深色文本，与原设计一致 */
+  --color-gray-100: #F3F4F6;   /* 卡片边框色，补充定义 */
 }
 
-/* 全局样式补充 */
+/* 4. 全局样式映射（确保自定义颜色与Tailwind类关联） */
 .bg-primary { background-color: var(--color-primary); }
 .text-primary { color: var(--color-primary); }
 .text-dark { color: var(--color-dark); }
+.border-gray-100 { border-color: var(--color-gray-100); }
+
+/* 5. 补充全局容器样式（确保页面布局正确，避免卡片挤压） */
+.container {
+  @apply max-w-7xl mx-auto px-4; /* 与原设计一致，确保内容居中 */
+}
+
+/* 6. 网格布局补充（确保卡片排列正确，避免溢出） */
+.grid {
+  @apply grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4;
+}
