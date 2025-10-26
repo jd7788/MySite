@@ -1,8 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const { siteCategories, apiVerifyPath, fetchTimeout } = window.APP_CONFIG;
+  const { apiVerifyPath, fetchTimeout, siteCategories } = window.APP_CONFIG;
 
-  // 渲染网站分类
-  renderSiteCategories();
   // 初始化时间显示（标准北京时间）
   initTimeDisplay();
   // 初始化搜索功能
@@ -10,45 +8,40 @@ document.addEventListener('DOMContentLoaded', () => {
   // 初始化密码弹窗
   initPasswordModal();
 
-  // 渲染网站分类和卡片
-  function renderSiteCategories() {
-    const container = document.getElementById('siteCategories');
-    siteCategories.forEach(category => {
-      const section = document.createElement('section');
-      section.className = 'mb-16';
-
-      // 分类标题
-      const title = document.createElement('h2');
-      title.className = 'category-title';
-      title.textContent = category.title;
-      section.appendChild(title);
-
-      // 卡片网格
-      const grid = document.createElement('div');
-      grid.className = 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 md:gap-6';
-
-      // 生成网站卡片
-      category.sites.forEach(site => {
-        const card = document.createElement('div');
-        card.className = `site-card group site-card--${site.key}`;
-        card.onclick = () => verifySite(site.key, site.name, site.defaultUrl);
-        card.innerHTML = `
-          <i class="fa ${site.icon} site-icon ${site.color} group-hover:text-primary"></i>
-          <div class="site-name-container">
-            <span class="site-name">${site.name} <i class="fa fa-lock text-xs text-dark-300"></i></span>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-
-      section.appendChild(grid);
-      container.appendChild(section);
-    });
-  }
-
   // 密码弹窗相关
   let currentSiteKey = "";
+  let currentSiteName = "";
   let currentSiteUrl = "";
+
+  // 【核心修改】适配静态HTML：根据siteKey获取网站名称和默认URL
+  window.verifySite = function(siteKey) {
+    // 从config.js的siteCategories中匹配对应网站
+    let targetSite = null;
+    for (const category of siteCategories) {
+      const site = category.sites.find(item => item.key === siteKey);
+      if (site) {
+        targetSite = site;
+        break;
+      }
+    }
+
+    if (!targetSite) {
+      alert("网站配置不存在");
+      return;
+    }
+
+    // 赋值当前网站信息
+    currentSiteKey = siteKey;
+    currentSiteName = targetSite.name;
+    currentSiteUrl = targetSite.defaultUrl;
+
+    // 打开弹窗
+    document.getElementById('modalTitle').textContent = `请输入【${currentSiteName}】的访问密码`;
+    document.getElementById('modalPassword').value = '';
+    document.getElementById('errorTip').classList.add('hidden');
+    document.getElementById('passwordModal').classList.remove('hidden');
+    document.getElementById('modalPassword').focus();
+  };
 
   function initPasswordModal() {
     const modal = document.getElementById('passwordModal');
@@ -82,17 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
     modalPassword.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') confirmBtn.click();
     });
-  }
-
-  // 打开验证弹窗
-  function verifySite(siteKey, siteName, defaultUrl) {
-    currentSiteKey = siteKey;
-    currentSiteUrl = defaultUrl;
-    document.getElementById('modalTitle').textContent = `请输入【${siteName}】的访问密码`;
-    document.getElementById('modalPassword').value = '';
-    document.getElementById('errorTip').classList.add('hidden');
-    document.getElementById('passwordModal').classList.remove('hidden');
-    document.getElementById('modalPassword').focus();
   }
 
   // 提交验证
@@ -149,13 +131,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // 北京时间显示（标准时区实现）
   function initTimeDisplay() {
     function updateTime() {
-      // 使用Intl.DateTimeFormat强制指定上海时区，确保时间准确
       const optionsDate = {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
         weekday: 'long',
-        timeZone: 'Asia/Shanghai' // 关键：锁定北京时间时区
+        timeZone: 'Asia/Shanghai'
       };
       
       const optionsTime = {
@@ -163,19 +144,16 @@ document.addEventListener('DOMContentLoaded', () => {
         minute: '2-digit',
         second: '2-digit',
         hour12: false,
-        timeZone: 'Asia/Shanghai' // 关键：锁定北京时间时区
+        timeZone: 'Asia/Shanghai'
       };
 
       const now = new Date();
-      // 格式化日期和时间（强制北京时间）
       const beijingDate = new Intl.DateTimeFormat('zh-CN', optionsDate).format(now);
       const beijingTime = new Intl.DateTimeFormat('zh-CN', optionsTime).format(now);
 
-      // 更新显示
       document.getElementById('beijingDate').textContent = beijingDate;
       document.getElementById('beijingTime').textContent = beijingTime;
 
-      // 隐藏骨架屏
       document.getElementById('dateSkeleton').classList.add('hidden');
       document.getElementById('timeSkeleton').classList.add('hidden');
       document.getElementById('beijingDate').classList.remove('hidden');
@@ -183,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     updateTime();
-    setInterval(updateTime, 1000); // 每秒更新
+    setInterval(updateTime, 1000);
   }
 
   // 搜索功能
