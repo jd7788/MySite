@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 1. 动态渲染网站分类和卡片
   renderSiteCategories();
-  // 2. 初始化时间显示
+  // 2. 初始化时间显示（修复北京时间快8小时问题）
   initTimeDisplay();
   // 3. 初始化搜索功能
   initSearch();
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
       title.textContent = category.title;
       section.appendChild(title);
 
-      // 网站网格（保持原布局：2列→6列响应式）
+      // 网站网格（响应式布局）
       const grid = document.createElement('div');
       grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4';
 
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.createElement('div');
         card.className = 'site-card group';
         card.onclick = () => verifySite(site.key, site.name, site.url);
-        // 卡片内容（使用配置的图标和颜色）
+        // 卡片内容（使用新样式类）
         card.innerHTML = `
           <i class="fa ${site.icon} site-icon ${site.color} group-hover:text-primary"></i>
           <span class="site-name">${site.name}</span>
@@ -74,12 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ------------------------------
-  // 函数：时间显示
+  // 函数：时间显示（核心修复：删除多余的8小时计算）
   // ------------------------------
   function initTimeDisplay() {
     function updateTime() {
-      const now = new Date();
-      const beijingTime = new Date(now.getTime() + 8 * 3600000); // UTC+8
+      // 修复：直接使用当前时间（浏览器会自动处理时区，北京时间无需加8小时）
+      const beijingTime = new Date();
       
       document.getElementById('beijingDate').textContent = beijingTime.toLocaleDateString('zh-CN', {
         year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
